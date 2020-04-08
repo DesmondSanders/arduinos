@@ -1,8 +1,3 @@
-/*********
-  Rui Santos
-  Complete project details at https://randomnerdtutorials.com  
-*********/
-
 // Import required libraries
 #include "WiFi.h"
 #include "ESPAsyncWebServer.h"
@@ -17,9 +12,7 @@ const char* password = "0004EDDABEAE";
 #define DHTPIN 14     // Digital pin connected to the DHT sensor
 
 // Uncomment the type of sensor in use:
-//#define DHTTYPE    DHT11     // DHT 11
 #define DHTTYPE    DHT22     // DHT 22 (AM2302)
-//#define DHTTYPE    DHT21     // DHT 21 (AM2301)
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -31,7 +24,6 @@ String readDHTTemperature() {
   // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
   // Read temperature as Fahrenheit (isFahrenheit = true)
-  //float t = dht.readTemperature(true);
   // Check if any reads failed and exit early (to try again).
   if (isnan(t)) {    
     Serial.println("Failed to read from DHT sensor!");
@@ -112,11 +104,11 @@ setInterval(function ( ) {
       document.getElementById("humidity").innerHTML = this.responseText;
     }
   };
-  xhttp.open("POST", "http://192.168.0.2/readings/write.php", true);
-  xhttp.setRequestHeader("Content-type", "application/json");
-  xhttp.send("temp=111&humitidy=222");
-  //xhttp.open("GET", "/humidity", true);
-  //xhttp.send();
+  //xhttp.open("POST", "http://192.168.0.2/readings/write.php", true);
+  //xhttp.setRequestHeader("Content-type", "application/json");
+  //xhttp.send("temp=111&humitidy=222");
+  xhttp.open("GET", "/humidity", true);
+  xhttp.send();
 }, 10000 ) ;
 </script>
 </html>)rawliteral";
@@ -136,7 +128,12 @@ String processor(const String& var){
 void setup(){
   // Serial port for debugging purposes
   Serial.begin(115200);
-
+  //Json connectivity --- Test1
+  StaticJsonBuffer<69> jsonBuffer;
+  char json[] = "{\"temp\":\"12345\",\"humidity\":\"678910\"}";
+  String MyServerURL="http://192.168.0.2/readings/write.php";
+  
+  
   dht.begin();
   
   // Connect to Wi-Fi
@@ -160,6 +157,30 @@ void setup(){
     request->send_P(200, "text/plain", readDHTHumidity().c_str());
   });
 
+  //testing posting to server
+  //Declare an object of class HTTPClient
+  HTTPClient http;
+  if (WiFi.status() == WL_CONNECTED) {
+    //Specify request destination
+    http.begin(MyServerURL);
+    http.addHeader("Content-Type", "application/json");
+    String data;
+    root.printTo(data);
+    //Send the request
+    int httpCode = http.POST(data);
+
+    //Check the returning code
+    if (httpCode > 0) {
+      //Get the request response payload
+      String payload = http.getString();
+      //Print the response payload
+      Serial.println(payload);
+    }
+    //Close connection
+    http.end();
+    Serial.println(httpCode);
+  }
+  
   // Start server
   server.begin();
 }
