@@ -173,6 +173,10 @@ void loop(){
   jsonData += "\"";
   jsonData += readDHTHumidity().c_str();
   jsonData += "\"";
+  jsonData += ",\"ipaddr\":";
+  jsonData += "\"";
+  jsonData += WiFi.localIP().toString();
+  jsonData += "\"";
   jsonData += "}"; 
   Serial.println(jsonData); 
   http.begin("http://192.168.0.2/readings/write1.php");                                          //Specify request destination
