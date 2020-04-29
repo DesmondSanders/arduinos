@@ -16,7 +16,7 @@
 const char* ssid = "sreddnas2g";
 const char* password = "0004EDDABEAE";
 
-#define DHTPIN 14     // Digital pin connected to the DHT sensor
+#define DHTPIN 12     // Digital pin connected to the DHT sensor
 
 // Uncomment the type of sensor in use:
 //#define DHTTYPE    DHT11     // DHT 11
@@ -188,6 +188,6 @@ void loop(){
 
   http.end();                           //Close connection
  
-  delay(30000);                         //Post Data at every 30 seconds
+  delay(300000);                         //Post Data at every 5 Minutes (300 seconds)
 
 }
