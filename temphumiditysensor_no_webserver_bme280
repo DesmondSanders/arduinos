@@ -87,9 +87,27 @@ void setup(){
     delay(1000);
     Serial.println("Connecting to WiFi..");
   }
-
   // Print ESP32 Local IP Address
   Serial.println(WiFi.localIP());
+//Register with Server
+String deviceid = WiFi.macAddress().c_str();
+HTTPClient http;                     //Declare object of class HTTPClient
+  String jsonData = "{\"deviceid\":";
+  jsonData += "\"";
+  jsonData += deviceid;
+  jsonData += "\"";
+  jsonData += ",\"deviceip\":";
+  jsonData += "\"";
+  jsonData += WiFi.localIP().toString();
+  jsonData += "\"";
+  jsonData += "}"; 
+  http.begin("http://192.168.0.2/deviceid/validateandwrite.php");                                          //Specify request destination
+  http.addHeader("Content-Type", "application/json" , "Content-Length", jsonData.length());    //Specify content-type header
+ 
+  int httpCode = http.POST(jsonData);   //Send the request
+  String payload = http.getString();    //Get the response payload
+
+  http.end();                           //Close connection
 
 }
  
@@ -103,22 +121,22 @@ void loop(){
   jsonData += "\"";
   jsonData += readDHTHumidity().c_str();
   jsonData += "\"";
+   jsonData += ",\"pressure\":";
+  jsonData += "\"";
+  jsonData += readDHTPressure().c_str();
+  jsonData += "\"";
    jsonData += ",\"ipaddr\":";
   jsonData += "\"";
   jsonData += WiFi.localIP().toString();
   jsonData += "\"";
   jsonData += "}"; 
-  Serial.println(jsonData); 
   http.begin("http://192.168.0.2/readings/write1.php");                                          //Specify request destination
   http.addHeader("Content-Type", "application/json" , "Content-Length", jsonData.length());    //Specify content-type header
 
-  Serial.println( " POSTing to Server...");
- 
+  
   int httpCode = http.POST(jsonData);   //Send the request
   String payload = http.getString();    //Get the response payload
 
-  Serial.println(httpCode);             //Print HTTP return code
-  Serial.println(payload);            //Print request response payload
 
   http.end();                           //Close connection
   
