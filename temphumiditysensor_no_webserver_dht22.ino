@@ -70,7 +70,25 @@ void setup(){
 
   // Print ESP32 Local IP Address
   Serial.println(WiFi.localIP());
+//Register with Server
+String deviceid = WiFi.macAddress().c_str();
+HTTPClient http;                     //Declare object of class HTTPClient
+  String jsonData = "{\"deviceid\":";
+  jsonData += "\"";
+  jsonData += deviceid;
+  jsonData += "\"";
+  jsonData += ",\"deviceip\":";
+  jsonData += "\"";
+  jsonData += WiFi.localIP().toString();
+  jsonData += "\"";
+  jsonData += "}"; 
+  http.begin("http://192.168.0.2/deviceid/validateandwrite.php");                                          //Specify request destination
+  http.addHeader("Content-Type", "application/json" , "Content-Length", jsonData.length());    //Specify content-type header
+ 
+  int httpCode = http.POST(jsonData);   //Send the request
+  String payload = http.getString();    //Get the response payload
 
+  http.end();                           //Close connection
 }
  
 void loop(){
