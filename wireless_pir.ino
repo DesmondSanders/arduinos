@@ -8,6 +8,7 @@ const char* ssid = "sreddnas2g";
 const char* password = "0004EDDABEAE";
 
 void setup(){
+  pinMode(5, INPUT);
   // Serial port for debugging purposes
   Serial.begin(115200);
    bool status;
@@ -44,38 +45,51 @@ HTTPClient http;                     //Declare object of class HTTPClient
 
 
 void turnOn(){
-
-}
-
-
-void loop(){
 HTTPClient http;                     //Declare object of class HTTPClient
-
 String jsonDataOn = "{\"on\":";  
   jsonDataOn += "true";
   jsonDataOn += "}"; 
 
-String jsonDataOff = "{\"on\":";  
-  jsonDataOff += "false";
-  jsonDataOff += "}"; 
-
-  //Turn On
+  
+//Turn On
   http.begin("http://192.168.0.7/api/xOICDVMHLssbId57Mdl7iF7sfhQ-Njy80ONJF6tW/lights/4/state");                                          //Specify request destination
   http.addHeader("Content-Type", "application/json" , "Content-Length", jsonDataOn.length());    //Specify content-type header
   int httpCode = http.PUT(jsonDataOn);   //Send the request
   String payload = http.getString();    //Get the response payload
   http.end();                           //Close connection
-
-  //Turn Off
-  http.begin("http://192.168.0.7/api/xOICDVMHLssbId57Mdl7iF7sfhQ-Njy80ONJF6tW/lights/4/state");                                          //Specify request destination
-  http.addHeader("Content-Type", "application/json" , "Content-Length", jsonDataOn.length());    //Specify content-type header
-  int httpCode = http.PUT(jsonDataOn);   //Send the request
-  String payload = http.getString();    //Get the response payload
-  http.end();                           //Close connection
-
-
-Serial.println(jsonDataOn);
+  Serial.println(jsonDataOn);
   Serial.println(payload);
   Serial.println(httpCode);
-delay(60);
+}
+
+void turnOff(){
+HTTPClient http;                     //Declare object of class HTTPClient
+String jsonDataOff = "{\"on\":";  
+  jsonDataOff += "false";
+  jsonDataOff += "}";
+  
+  //Turn Off
+  http.begin("http://192.168.0.7/api/xOICDVMHLssbId57Mdl7iF7sfhQ-Njy80ONJF6tW/lights/4/state");                                          //Specify request destination
+  http.addHeader("Content-Type", "application/json" , "Content-Length", jsonDataOff.length());    //Specify content-type header
+  int httpCode = http.PUT(jsonDataOff);   //Send the request
+  String payload = http.getString();    //Get the response payload
+  http.end();                           //Close connection
+  Serial.println(jsonDataOff);
+  Serial.println(payload);
+  Serial.println(httpCode);
+}
+
+void loop(){
+
+bool value = digitalRead(5);
+if (value == 1) {
+  Serial.println("Motion Detected");
+  //turnOn();
+} else {
+  Serial.println("No Motion Detected");
+  //Serial.println("1");
+  //turnOff();
+}
+delay(60000);
+
 }
