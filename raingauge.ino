@@ -30,6 +30,42 @@ void setup() {
   }
   // Print ESP32 Local IP Address
   Serial.println(WiFi.localIP());
+   //Register with Server
+String deviceid = WiFi.macAddress().c_str();
+HTTPClient http;                     //Declare object of class HTTPClient
+  String jsonData = "{\"deviceid\":";
+  jsonData += "\"";
+  jsonData += deviceid;
+  jsonData += "\"";
+  jsonData += ",\"deviceip\":";
+  jsonData += "\"";
+  jsonData += WiFi.localIP().toString();
+  jsonData += "\"";
+  jsonData += "}"; 
+  http.begin("https://192.168.0.2/deviceid/validateandwrite.php");                                          //Specify request destination
+  http.addHeader("Content-Type", "application/json" , "Content-Length", jsonData.length());    //Specify content-type header
+  int httpCode = http.POST(jsonData);   //Send the request
+  String payload = http.getString();    //Get the response payload
+  http.end();                           //Close connection 
+}
+
+void updateweb(float rainreadinmm){
+HTTPClient http;                     //Declare object of class HTTPClient
+  String jsonData = "{\"reading\":";
+  jsonData += "\"";
+  jsonData += rainreadinmm;
+  jsonData += "\"";
+  jsonData += ",\"ipaddr\":";
+  jsonData += "\"";
+  jsonData += WiFi.localIP().toString();
+  jsonData += "\"";
+  jsonData += "}"; 
+  Serial.println(jsonData);
+  http.begin("https://192.168.0.2/rain/validateandwrite.php");                                          //Specify request destination
+  http.addHeader("Content-Type", "application/json" , "Content-Length", jsonData.length());    //Specify content-type header
+  int httpCode = http.POST(jsonData);   //Send the request
+  String payload = http.getString();    //Get the response payload
+  http.end();                           //Close connection
 }
 
 void loop() {
@@ -45,32 +81,14 @@ void loop() {
   if (hallRead() <= 0) {
     Serial.println(hallRead());
     rainCounter++;
-
     unsigned long currentTime = millis();
     float timeElapsed = (currentTime - lastTickTime) / 1000.0; // Convert to seconds
     lastTickTime = currentTime;
-
     // Calculate rainfall rate
     float ticksPerHour = 3600.0 / timeElapsed;
     float totalVolumePerHour = volumePerTick * rainCounter * ticksPerHour; // Total volume in ml/hour
     float rainfallRateLPerM2 = totalVolumePerHour / 1000.0 / Pf; // Convert to l/m²/h
-
-    Serial.print("Rainfall rate: ");
-    Serial.print(rainfallRateLPerM2);
-    Serial.println(" l/m²/h(mm/hour)");
-
-    // Calculate mm/day
-    float rainfallRateMmPerDay = rainfallRateLPerM2 * 24; // Convert from mm/hour to mm/day
-
-    Serial.print("Rainfall rate: ");
-    Serial.print(rainfallRateMmPerDay);
-    Serial.println(" mm/day");
-
-    Serial.print("timeElapsed between ticks: ");
-    Serial.println(timeElapsed);
-
-    Serial.print("ticks / hour: ");
-    Serial.println(ticksPerHour);
-    delay(500); // Debounce delay
+    updateweb(rainfallRateLPerM2);
+    delay(100); // Debounce delay
   }
 }
