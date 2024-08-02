@@ -1,0 +1,6 @@
+Pin Layout for BME 280
+BME280	ESP32
+Vin	3.3V
+GND	GND
+SCL	Pin22 (GPIO 22)
+SDA	Pin21 (GPIO 21)
